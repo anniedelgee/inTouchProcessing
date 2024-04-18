@@ -18,7 +18,7 @@ void setup() {
         float y = map(j, 0, DIM, -1, 1);
         float z = map(k, 0, DIM, -1, 1);
         PVector zeta = new PVector(0, 0, 0);
-        int n = 24;
+        int n = 4; //changes form- keep between 4-64 (4 dispersed but formed, 64, most solid)
         int maxiterations = 10;
         int iteration = 0;
         while (true) {
