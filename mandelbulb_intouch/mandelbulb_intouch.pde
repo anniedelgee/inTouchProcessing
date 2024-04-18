@@ -1,14 +1,35 @@
 import peasy.*;
+import controlP5.*;
 
-int DIM = 128;
+int DIM = 50;
 PeasyCam cam;
 ArrayList<PVector> mandelbulb = new ArrayList<PVector>();
+ControlP5 cp5;
+
+float hueValue= 150; //initial hue value
+int chaos = 4;
 
 void setup() {
   size(600, 600, P3D);
   cam = new PeasyCam(this, 600);
+  cp5= new ControlP5(this);
+  
+  generateMandelbulb();
+  // Add a slider to control hue
+  //cp5.addSlider("hueValue")
+     //.setPosition(20, 20);
+     //.setRange(0, 255) // Range of the slider
+     //.setValue(150)    // Initial value
+    //.setWidth(200);   // Width of the slider
 
-  StringList points = new StringList();
+ 
+}
+
+void generateMandelbulb(){
+  //changes form- keep between 4-64 (4 dispersed but formed, 64, most solid)
+
+   StringList points = new StringList();
+   mandelbulb = new ArrayList<PVector>();
 
   for (int i = 0; i < DIM; i++) {
     for (int j = 0; j < DIM; j++) {
@@ -18,22 +39,19 @@ void setup() {
         float y = map(j, 0, DIM, -1, 1);
         float z = map(k, 0, DIM, -1, 1);
         PVector zeta = new PVector(0, 0, 0);
-        int n = 4; //changes form- keep between 4-64 (4 dispersed but formed, 64, most solid)
         int maxiterations = 10;
         int iteration = 0;
         while (true) {
           Spherical c = spherical(zeta.x, zeta.y, zeta.z);
-          float newx = pow(c.r, n) * sin(c.theta*n) * cos(c.phi*n);
-          float newy = pow(c.r, n) * sin(c.theta*n) * sin(c.phi*n);
-          float newz = pow(c.r, n) * cos(c.theta*n);
+          float newx = pow(c.r, chaos) * sin(c.theta*chaos) * cos(c.phi*chaos);
+          float newy = pow(c.r, chaos) * sin(c.theta*chaos) * sin(c.phi*chaos);
+          float newz = pow(c.r, chaos) * cos(c.theta*chaos);
           zeta.x = newx + x;
           zeta.y = newy + y;
           zeta.z = newz + z;
           iteration++;
           if (c.r > 2) {
-            if (edge) {
               edge = false;
-            }
             break;
           }
           if (iteration > maxiterations) {
@@ -54,6 +72,7 @@ void setup() {
     output[i] = v.x + " " + v.y + " " + v.z;
   }
   saveStrings("mandelbulb.txt", output);
+  
   
 }
 
@@ -77,9 +96,34 @@ void draw() {
   background(0);
   rotateX(PI/4);
   rotateY(-PI/3);
+  colorMode(HSB, 255); //colour change
+  //rotation 
+  float angle = millis() * 0.001;
+  rotateY(angle);
+  
+  stroke(hueValue, 255, 255);
+  
   for (PVector v : mandelbulb) {
-    stroke(255);
-    strokeWeight(1);
+    //stroke(200, 200, 255); //COLOUR CHANGE between 1-255- HUE SATURATION BRIGHTNESS
+    strokeWeight(2);
     point(v.x*200, v.y*200, v.z*200);
+  }
+}
+void hueValue(float val) {
+  hueValue = val; // slider value change for hue
+}
+
+
+void keyPressed() {
+  if (key == '+') {
+    chaos += 5; // Increment by 5
+    chaos = constrain(chaos, 4, 64); // Ensure n stays within the range of 4 to 64
+    println("n is now: " + chaos);
+    generateMandelbulb(); // Regenerate mandelbulb when n changes
+  } else if (key == '-') {
+    chaos -= 5; // Decrement by 5
+    chaos = constrain(chaos, 4, 64); // Ensure n stays within the range of 4 to 64
+    println("n is now: " + chaos);
+    generateMandelbulb(); // Regenerate mandelbulb when n changes
   }
 }
